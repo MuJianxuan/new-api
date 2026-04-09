@@ -9,10 +9,22 @@ func ChatCompletionsRequestToResponsesRequest(req *dto.GeneralOpenAIRequest) (*d
 	return openaicompat.ChatCompletionsRequestToResponsesRequest(req)
 }
 
+func ResponsesRequestToChatCompletionsRequest(req *dto.OpenAIResponsesRequest) (*dto.GeneralOpenAIRequest, error) {
+	return openaicompat.ResponsesRequestToChatCompletionsRequest(req)
+}
+
 func ResponsesResponseToChatCompletionsResponse(resp *dto.OpenAIResponsesResponse, id string) (*dto.OpenAITextResponse, *dto.Usage, error) {
 	return openaicompat.ResponsesResponseToChatCompletionsResponse(resp, id)
 }
 
+func ChatCompletionsResponseToResponsesResponse(resp *dto.OpenAITextResponse, id string) (*dto.OpenAIResponsesResponse, *dto.Usage, error) {
+	return openaicompat.ChatCompletionsResponseToResponsesResponse(resp, id)
+}
+
 func ExtractOutputTextFromResponses(resp *dto.OpenAIResponsesResponse) string {
 	return openaicompat.ExtractOutputTextFromResponses(resp)
+}
+
+func NewChatToResponsesStreamBuilder() *openaicompat.ChatToResponsesStreamBuilder {
+	return openaicompat.NewChatToResponsesStreamBuilder()
 }
