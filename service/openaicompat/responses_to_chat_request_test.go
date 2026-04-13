@@ -125,3 +125,25 @@ func TestResponsesRequestToChatCompletionsRequest_MultimodalAndLimits(t *testing
 	require.Equal(t, dto.ContentTypeText, parts[0].Type)
 	require.Equal(t, dto.ContentTypeImageURL, parts[1].Type)
 }
+
+func TestResponsesRequestToChatCompletionsRequest_ServiceTierAndStore(t *testing.T) {
+	t.Parallel()
+
+	storeRaw, err := common.Marshal(false)
+	require.NoError(t, err)
+
+	req := &dto.OpenAIResponsesRequest{
+		Model:       "gpt-4.1",
+		ServiceTier: "flex",
+		Store:       storeRaw,
+	}
+
+	chatReq, convErr := ResponsesRequestToChatCompletionsRequest(req)
+	require.NoError(t, convErr)
+	require.JSONEq(t, `"flex"`, string(chatReq.ServiceTier))
+
+	var store bool
+	err = common.Unmarshal(chatReq.Store, &store)
+	require.NoError(t, err)
+	require.False(t, store)
+}

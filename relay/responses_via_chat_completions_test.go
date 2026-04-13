@@ -9,7 +9,6 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/dto"
-	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
@@ -46,7 +45,7 @@ func TestHandleChatCompletionsAsResponses(t *testing.T) {
 		Body:       io.NopCloser(bytes.NewReader(body)),
 	}
 
-	usage, newAPIError := handleChatCompletionsAsResponses(ctx, &relaycommon.RelayInfo{}, httpResp)
+	usage, newAPIError := handleChatCompletionsAsResponses(ctx, httpResp)
 	require.Nil(t, newAPIError)
 	require.NotNil(t, usage)
 	require.Equal(t, 3, usage.InputTokens)

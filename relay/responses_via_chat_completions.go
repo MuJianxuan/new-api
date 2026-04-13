@@ -108,7 +108,7 @@ func handleChatCompletionsAsResponses(c *gin.Context, resp *http.Response) (*dto
 	if err := common.Unmarshal(body, &chatResp); err != nil {
 		return nil, types.NewOpenAIError(err, types.ErrorCodeBadResponseBody, http.StatusInternalServerError)
 	}
-	if oaiError := chatResp.Error; oaiError != nil && oaiError.Type != "" {
+	if oaiError := chatResp.GetOpenAIError(); oaiError != nil && oaiError.Type != "" {
 		return nil, types.WithOpenAIError(*oaiError, resp.StatusCode)
 	}
 
@@ -133,29 +133,32 @@ func handleChatCompletionsAsResponsesStream(c *gin.Context, info *relaycommon.Re
 
 	builder := service.NewChatToResponsesStreamBuilder()
 	usage := &dto.Usage{}
-	helper.StreamScannerHandler(c, resp, info, func(data string) bool {
+	helper.StreamScannerHandler(c, resp, info, func(data string, sr *helper.StreamResult) {
 		if strings.TrimSpace(data) == "[DONE]" {
-			return true
+			sr.Done()
+			return
 		}
 		var streamResponse dto.ChatCompletionsStreamResponse
 		if err := common.UnmarshalJsonStr(data, &streamResponse); err != nil {
-			return true
+			sr.Error(err)
+			return
 		}
 		events, err := builder.ConsumeChunk(streamResponse)
 		if err != nil {
-			return false
+			sr.Stop(err)
+			return
 		}
 		for _, event := range events {
 			eventData, err := common.Marshal(event)
 			if err != nil {
-				return false
+				sr.Stop(err)
+				return
 			}
 			helper.ResponseChunkData(c, event, string(eventData))
 			if event.Type == "response.completed" && event.Response != nil && event.Response.Usage != nil {
 				usage = event.Response.Usage
 			}
 		}
-		return true
 	})
 	return usage, nil
 }

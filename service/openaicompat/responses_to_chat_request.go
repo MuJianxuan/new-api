@@ -48,10 +48,16 @@ func ResponsesRequestToChatCompletionsRequest(req *dto.OpenAIResponsesRequest) (
 		Tools:         tools,
 		ToolChoice:    parseResponsesToolChoice(req.ToolChoice),
 		User:          req.User,
-		ServiceTier:   jsonRawIfNotEmpty(req.ServiceTier),
 		Store:         jsonRawIfNotEmpty(req.Store),
 		Metadata:      jsonRawIfNotEmpty(req.Metadata),
 		TopLogProbs:   req.TopLogProbs,
+	}
+	if req.ServiceTier != "" {
+		serviceTierRaw, err := common.Marshal(req.ServiceTier)
+		if err != nil {
+			return nil, err
+		}
+		out.ServiceTier = serviceTierRaw
 	}
 
 	if req.Reasoning != nil {
