@@ -1,0 +1,1 @@
+GOMEMLIMIT=128MiB ./new-api
